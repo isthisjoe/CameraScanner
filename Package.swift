@@ -3,14 +3,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "WeScan",
+    name: "CameraScanner",
     defaultLocalization: "en",
     platforms: [
         .iOS(.v12)
     ],
     products: [
         // dev .library(name: "DangerDeps", type: .dynamic, targets: ["DangerDependencies"]), // dev
-        .library(name: "WeScan", type: .static, targets: ["WeScan"])
+        .library(name: "CameraScanner", type: .static, targets: ["CameraScanner"])
     ],
     dependencies: [
         // dev .package(name: "danger-swift", url: "https://github.com/danger/swift", from: "3.0.0"),
@@ -21,7 +21,7 @@ let package = Package(
         // no dependencies outside of Foundation, the dependencies section
         // ensures that the library for Danger gets build also.
         // dev .target(name: "DangerDependencies", dependencies: [.product(name: "Danger", package: "danger-swift"), "WeTransferPRLinter"], path: "Submodules/WeTransfer-iOS-CI/Danger-Swift", sources: ["DangerFakeSource.swift"]),
-        .target(name: "WeScan",
+        .target(name: "CameraScanner",
                 path: "WeScan",
                 exclude: [
                     "Info.plist",
