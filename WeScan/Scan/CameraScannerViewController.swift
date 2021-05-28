@@ -24,6 +24,9 @@ public final class CameraScannerViewController: UIViewController {
     public var isAutoScanEnabled: Bool = CaptureSession.current.isAutoScanEnabled {
         didSet {
             CaptureSession.current.isAutoScanEnabled = isAutoScanEnabled
+            quadView.isHidden = isAutoScanEnabled
+          captureSessionManager?.isDetecting = false
+          quadView.removeQuadrilateral()
         }
     }
 
@@ -41,6 +44,13 @@ public final class CameraScannerViewController: UIViewController {
     
     /// Whether flash is enabled
     private var flashEnabled = false
+  
+    public var isDetecting: Bool = false {
+      didSet {
+        captureSessionManager?.isDetecting = isDetecting
+        CaptureSession.current.isEditing = !isDetecting
+      }
+    }
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -163,12 +173,14 @@ extension CameraScannerViewController: RectangleDetectionDelegateProtocol {
     }
     
     func didStartCapturingPicture(for captureSessionManager: CaptureSessionManager) {
-        captureSessionManager.stop()
+        captureSessionManager.isDetecting = false
+        quadView.removeQuadrilateral()
     }
     
     func captureSessionManager(_ captureSessionManager: CaptureSessionManager,
                                didCapturePicture picture: UIImage,
                                withQuad quad: Quadrilateral?) {
+        quadView.removeQuadrilateral()
         delegate?.captureImageSuccess(image: picture, withQuad: quad)
     }
     
