@@ -24,7 +24,7 @@ public final class CameraScannerViewController: UIViewController {
     public var isAutoScanEnabled: Bool = CaptureSession.current.isAutoScanEnabled {
         didSet {
             CaptureSession.current.isAutoScanEnabled = isAutoScanEnabled
-            quadView.isHidden = isAutoScanEnabled
+//          quadView.isHidden = isAutoScanEnabled
           captureSessionManager?.isDetecting = false
           quadView.removeQuadrilateral()
         }
@@ -173,8 +173,9 @@ extension CameraScannerViewController: RectangleDetectionDelegateProtocol {
     }
     
     func didStartCapturingPicture(for captureSessionManager: CaptureSessionManager) {
-        captureSessionManager.isDetecting = false
-        quadView.removeQuadrilateral()
+//        captureSessionManager.stop()
+      captureSessionManager.isDetecting = false
+      quadView.removeQuadrilateral()
     }
     
     func captureSessionManager(_ captureSessionManager: CaptureSessionManager,
