@@ -34,7 +34,7 @@ public final class CameraScannerViewController: UIViewController {
     public weak var delegate: CameraScannerViewOutputDelegate?
 
     private var captureSessionManager: CaptureSessionManager?
-    private let videoPreviewLayer = AVCaptureVideoPreviewLayer()
+    public let videoPreviewLayer = AVCaptureVideoPreviewLayer()
     
     /// The view that shows the focus rectangle (when the user taps to focus, similar to the Camera app)
     private var focusRectangle: FocusRectangleView!
