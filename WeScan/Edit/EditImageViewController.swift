@@ -12,7 +12,7 @@ import AVFoundation
 /// A protocol that your delegate object will get results of EditImageViewController.
 public protocol EditImageViewDelegate: AnyObject {
     /// A method that your delegate object must implement to get cropped image.
-    func cropped(image: UIImage)
+    func cropped(image: UIImage, quad: Quadrilateral)
 }
 
 /// A view controller that manages edit image for scanning documents or pick image from photo library
@@ -137,7 +137,7 @@ public final class EditImageViewController: UIViewController {
         ])
 
         let croppedImage = UIImage.from(ciImage: filteredImage)
-        delegate?.cropped(image: croppedImage)
+        delegate?.cropped(image: croppedImage, quad: scaledQuad)
     }
     
     /// This function allow user to rotate image by 90 degree each and will reload image on image view.
