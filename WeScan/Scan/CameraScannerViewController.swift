@@ -51,7 +51,24 @@ public final class CameraScannerViewController: UIViewController {
         CaptureSession.current.isEditing = !isDetecting
       }
     }
+  
+    public var videoDeviceZoomFactor: CGFloat?
+
+    public var photoOutputFormat: PhotoOutputFormat?
     
+    public init(
+      videoDeviceZoomFactor: CGFloat? = nil,
+      photoOutputFormat: PhotoOutputFormat? = nil
+    ) {
+      self.videoDeviceZoomFactor = videoDeviceZoomFactor
+      self.photoOutputFormat = photoOutputFormat
+      super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+      fatalError("init(coder:) has not been implemented")
+    }
+  
     override public func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -89,7 +106,11 @@ public final class CameraScannerViewController: UIViewController {
         view.addSubview(quadView)
         setupConstraints()
         
-        captureSessionManager = CaptureSessionManager(videoPreviewLayer: videoPreviewLayer)
+        captureSessionManager = CaptureSessionManager(
+          videoPreviewLayer: videoPreviewLayer,
+          videoDeviceZoomFactor: videoDeviceZoomFactor,
+          photoOutputFormat: photoOutputFormat
+        )
         captureSessionManager?.delegate = self
         
         NotificationCenter.default.addObserver(self, selector: #selector(subjectAreaDidChange), name: Notification.Name.AVCaptureDeviceSubjectAreaDidChange, object: nil)

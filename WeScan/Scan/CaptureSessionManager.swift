@@ -60,11 +60,22 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     
     /// The minimum number of time required by `noRectangleCount` to validate that no rectangles have been found.
     private let noRectangleThreshold = 3
+  
+    public var videoDeviceZoomFactor: CGFloat?
+  
+    public var photoOutputFormat: PhotoOutputFormat?
     
     // MARK: Life Cycle
     
-    init?(videoPreviewLayer: AVCaptureVideoPreviewLayer, delegate: RectangleDetectionDelegateProtocol? = nil) {
+    init?(
+      videoPreviewLayer: AVCaptureVideoPreviewLayer,
+      videoDeviceZoomFactor: CGFloat? = nil,
+      photoOutputFormat: PhotoOutputFormat? = nil,
+      delegate: RectangleDetectionDelegateProtocol? = nil
+    ) {
         self.videoPreviewLayer = videoPreviewLayer
+        self.videoDeviceZoomFactor = videoDeviceZoomFactor
+        self.photoOutputFormat = photoOutputFormat
         
         if delegate != nil {
             self.delegate = delegate
@@ -118,14 +129,20 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         if captureSession.canSetSessionPreset(photoPreset) {
             captureSession.sessionPreset = photoPreset
             
-            if photoOutput.isLivePhotoCaptureSupported {
-                photoOutput.isLivePhotoCaptureEnabled = true
-            }
+//            if photoOutput.isLivePhotoCaptureSupported {
+//                photoOutput.isLivePhotoCaptureEnabled = true
+//            }
         }
-        
         videoPreviewLayer.session = captureSession
         videoPreviewLayer.videoGravity = .resizeAspectFill
-        
+      
+        if let videoDeviceZoomFactor = videoDeviceZoomFactor {
+            device.videoZoomFactor = videoDeviceZoomFactor
+            if videoDeviceZoomFactor != 1.0 {
+                videoPreviewLayer.videoGravity = .resizeAspect
+            }
+        }
+      
         videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "video_ouput_queue"))
     }
     
@@ -137,7 +154,8 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         
         switch authorizationStatus {
         case .authorized:
-            DispatchQueue.main.async {
+//            DispatchQueue.main.async {
+            DispatchQueue.global(qos: .background).async {
                 self.captureSession.startRunning()
             }
             isDetecting = false
@@ -164,10 +182,83 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
             return
         }
         CaptureSession.current.setImageOrientation()
+      
+        photoOutput.capturePhoto(with: photoSettings(), delegate: self)
+    }
+  
+    private func photoSettings() -> AVCapturePhotoSettings {
+      func defaultPhotoSettings() -> AVCapturePhotoSettings {
         let photoSettings = AVCapturePhotoSettings()
         photoSettings.isHighResolutionPhotoEnabled = true
         photoSettings.isAutoStillImageStabilizationEnabled = true
-        photoOutput.capturePhoto(with: photoSettings, delegate: self)
+        return photoSettings
+      }
+      
+      guard let photoOutputFormat = photoOutputFormat else {
+        return defaultPhotoSettings()
+      }
+      
+      let photoSettings: AVCapturePhotoSettings
+      switch photoOutputFormat {
+      case .jpeg:
+        let jpegFormat = [AVVideoCodecKey: AVVideoCodecType.jpeg]
+        photoSettings = AVCapturePhotoSettings(format: jpegFormat)
+        photoSettings.isHighResolutionPhotoEnabled = true
+        if #available(iOS 13.0, *) {
+          photoSettings.photoQualityPrioritization = .quality
+          photoOutput.maxPhotoQualityPrioritization = .quality
+        }
+        
+      case .hvec:
+        let hevcFormat = [AVVideoCodecKey: AVVideoCodecType.hevc]
+        photoSettings = AVCapturePhotoSettings(format: hevcFormat)
+        photoSettings.isHighResolutionPhotoEnabled = true
+        if #available(iOS 13.0, *) {
+          photoSettings.photoQualityPrioritization = .quality
+          photoOutput.maxPhotoQualityPrioritization = .quality
+        }
+        
+      case .uncompressedTIFF:
+        let uncompressedPixelFormatType = kCVPixelFormatType_32BGRA
+        if photoOutput.availablePhotoPixelFormatTypes.contains(uncompressedPixelFormatType) {
+          let uncompressedFormat: [String: Any] = [(kCVPixelBufferPixelFormatTypeKey as String): kCVPixelFormatType_32BGRA]
+          photoSettings = AVCapturePhotoSettings(format: uncompressedFormat)
+          photoSettings.isHighResolutionPhotoEnabled = true
+          if #available(iOS 13.0, *) {
+            photoSettings.photoQualityPrioritization = .quality
+            photoOutput.maxPhotoQualityPrioritization = .quality
+          }
+        } else {
+          print("🔴 \((#file as NSString).lastPathComponent):\(#line) " +
+                "kCVPixelFormatType_32BGRA format not available")
+          photoSettings = defaultPhotoSettings()
+        }
+        
+      case .bayerRAW:
+        if #available(iOS 14.3, *),
+           let bayerRAWPixelFormat = photoOutput.availableRawPhotoPixelFormatTypes.first(
+            where: { AVCapturePhotoOutput.isBayerRAWPixelFormat($0)} ) {
+          photoSettings = AVCapturePhotoSettings(rawPixelFormatType: bayerRAWPixelFormat)
+          photoSettings.isHighResolutionPhotoEnabled = true
+        } else {
+          print("🔴 \((#file as NSString).lastPathComponent):\(#line) " +
+                "Bayer RAW pixel format not available")
+          photoSettings = defaultPhotoSettings()
+        }
+        
+      case .appleProRAW:
+        if #available(iOS 14.3, *),
+           let appleProRAWPixelFormat = photoOutput.availableRawPhotoPixelFormatTypes.first(
+            where: { AVCapturePhotoOutput.isAppleProRAWPixelFormat($0)} ) {
+          photoSettings = AVCapturePhotoSettings(rawPixelFormatType: appleProRAWPixelFormat)
+          photoSettings.isHighResolutionPhotoEnabled = true
+        } else {
+          print("🔴 \((#file as NSString).lastPathComponent):\(#line) " +
+                "Apple ProRAW pixel format not available")
+          photoSettings = defaultPhotoSettings()
+        }
+      }
+      return photoSettings
     }
     
     // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
