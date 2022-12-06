@@ -61,21 +61,17 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     /// The minimum number of time required by `noRectangleCount` to validate that no rectangles have been found.
     private let noRectangleThreshold = 3
   
-    public var videoDeviceZoomFactor: CGFloat?
-  
-    public var photoOutputFormat: PhotoOutputFormat?
+    private let options: CaptureSessionOptions
     
     // MARK: Life Cycle
     
     init?(
       videoPreviewLayer: AVCaptureVideoPreviewLayer,
-      videoDeviceZoomFactor: CGFloat? = nil,
-      photoOutputFormat: PhotoOutputFormat? = nil,
+      options: CaptureSessionOptions,
       delegate: RectangleDetectionDelegateProtocol? = nil
     ) {
         self.videoPreviewLayer = videoPreviewLayer
-        self.videoDeviceZoomFactor = videoDeviceZoomFactor
-        self.photoOutputFormat = photoOutputFormat
+        self.options = options
         
         if delegate != nil {
             self.delegate = delegate
@@ -134,13 +130,10 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 //            }
         }
         videoPreviewLayer.session = captureSession
-        videoPreviewLayer.videoGravity = .resizeAspectFill
+        videoPreviewLayer.videoGravity = options.previewLayerVideoGravity
       
-        if let videoDeviceZoomFactor = videoDeviceZoomFactor {
+        if let videoDeviceZoomFactor = options.videoDeviceZoomFactor {
             device.videoZoomFactor = videoDeviceZoomFactor
-            if videoDeviceZoomFactor != 1.0 {
-                videoPreviewLayer.videoGravity = .resizeAspect
-            }
         }
       
         videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "video_ouput_queue"))
@@ -194,7 +187,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         return photoSettings
       }
       
-      guard let photoOutputFormat = photoOutputFormat else {
+      guard let photoOutputFormat = options.photoOutputFormat else {
         return defaultPhotoSettings()
       }
       

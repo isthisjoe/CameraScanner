@@ -77,7 +77,11 @@ public final class ScannerViewController: UIViewController {
         setupNavigationBar()
         setupConstraints()
         
-        captureSessionManager = CaptureSessionManager(videoPreviewLayer: videoPreviewLayer, delegate: self)
+        captureSessionManager = CaptureSessionManager(
+          videoPreviewLayer: videoPreviewLayer,
+          options: CaptureSessionOptions(),
+          delegate: self
+        )
         
         originalBarStyle = navigationController?.navigationBar.barStyle
         

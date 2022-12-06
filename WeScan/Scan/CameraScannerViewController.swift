@@ -52,16 +52,12 @@ public final class CameraScannerViewController: UIViewController {
       }
     }
   
-    public var videoDeviceZoomFactor: CGFloat?
-
-    public var photoOutputFormat: PhotoOutputFormat?
+    public var options: CaptureSessionOptions
     
     public init(
-      videoDeviceZoomFactor: CGFloat? = nil,
-      photoOutputFormat: PhotoOutputFormat? = nil
+      options: CaptureSessionOptions
     ) {
-      self.videoDeviceZoomFactor = videoDeviceZoomFactor
-      self.photoOutputFormat = photoOutputFormat
+      self.options = options
       super.init(nibName: nil, bundle: nil)
     }
     
@@ -108,8 +104,7 @@ public final class CameraScannerViewController: UIViewController {
         
         captureSessionManager = CaptureSessionManager(
           videoPreviewLayer: videoPreviewLayer,
-          videoDeviceZoomFactor: videoDeviceZoomFactor,
-          photoOutputFormat: photoOutputFormat
+          options: options
         )
         captureSessionManager?.delegate = self
         
@@ -146,6 +141,8 @@ public final class CameraScannerViewController: UIViewController {
     
     override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
+      
+        if options.tapToFocus == false { return }
         
         guard  let touch = touches.first else { return }
         let touchPoint = touch.location(in: view)
