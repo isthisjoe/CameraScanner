@@ -99,7 +99,7 @@ public final class CameraScannerViewController: UIViewController {
     }
     
     private func setupView() {
-        view.backgroundColor = .darkGray
+        view.backgroundColor = .black
         view.layer.addSublayer(videoPreviewLayer)
         quadView.translatesAutoresizingMaskIntoConstraints = false
         quadView.editable = false
