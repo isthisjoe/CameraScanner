@@ -137,6 +137,11 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         }
       
         videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "video_ouput_queue"))
+      
+        if #available(iOS 15.4, *) {
+            device.automaticallyAdjustsFaceDrivenAutoFocusEnabled = options.faceDrivenAutoFocus
+            device.isFaceDrivenAutoFocusEnabled = options.faceDrivenAutoFocus
+        }
     }
     
     // MARK: Capture Session Life Cycle

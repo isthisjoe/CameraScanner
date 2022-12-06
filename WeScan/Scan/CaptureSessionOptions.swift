@@ -9,17 +9,20 @@ public struct CaptureSessionOptions: Equatable {
     && lhs.videoDeviceZoomFactor == rhs.videoDeviceZoomFactor
   }
   
+  let faceDrivenAutoFocus: Bool
   let photoOutputFormat: PhotoOutputFormat?
   let previewLayerVideoGravity: AVLayerVideoGravity
   let tapToFocus: Bool
   let videoDeviceZoomFactor: CGFloat?
   
   public init(
+    faceDrivenAutoFocus: Bool = true,
     photoOutputFormat: PhotoOutputFormat? = nil,
     previewLayerVideoGravity: AVLayerVideoGravity = .resizeAspectFill,
     tapToFocus: Bool = true,
     videoDeviceZoomFactor: CGFloat? = nil
   ) {
+    self.faceDrivenAutoFocus = faceDrivenAutoFocus
     self.photoOutputFormat = photoOutputFormat
     self.previewLayerVideoGravity = previewLayerVideoGravity
     self.tapToFocus = tapToFocus
