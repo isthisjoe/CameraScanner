@@ -143,6 +143,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
             if device.automaticallyAdjustsFaceDrivenAutoFocusEnabled == false {
                 device.isFaceDrivenAutoFocusEnabled = options.faceDrivenAutoFocus
             }
+            device.focusMode = .continuousAutoFocus
         }
     }
     
