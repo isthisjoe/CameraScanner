@@ -10,7 +10,12 @@ let package = Package(
     ],
     products: [
         // dev .library(name: "DangerDeps", type: .dynamic, targets: ["DangerDependencies"]), // dev
-        .library(name: "CameraScanner", type: .static, targets: ["CameraScanner"])
+        .library(
+          name: "CameraScanner", 
+          // Temporary fix to allow XCode 14 previews to work: https://developer.apple.com/forums/thread/707569
+          // type: .static, 
+          targets: ["CameraScanner"]
+          )
     ],
     dependencies: [
         // dev .package(name: "danger-swift", url: "https://github.com/danger/swift", from: "3.0.0"),
