@@ -140,7 +140,9 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
       
         if #available(iOS 15.4, *) {
             device.automaticallyAdjustsFaceDrivenAutoFocusEnabled = options.faceDrivenAutoFocus
-            device.isFaceDrivenAutoFocusEnabled = options.faceDrivenAutoFocus
+            if device.automaticallyAdjustsFaceDrivenAutoFocusEnabled == false {
+                device.isFaceDrivenAutoFocusEnabled = options.faceDrivenAutoFocus
+            }
         }
     }
     
