@@ -105,7 +105,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
                 delegate?.captureSessionManager(self, didFailWithError: error)
                 return
         }
-        
+      
         do {
             try device.lockForConfiguration()
         } catch {
@@ -211,12 +211,18 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         }
         
       case .hvec:
-        let hevcFormat = [AVVideoCodecKey: AVVideoCodecType.hevc]
-        photoSettings = AVCapturePhotoSettings(format: hevcFormat)
-        photoSettings.isHighResolutionPhotoEnabled = true
-        if #available(iOS 13.0, *) {
-          photoSettings.photoQualityPrioritization = .quality
-          photoOutput.maxPhotoQualityPrioritization = .quality
+        let hevcFormat = AVVideoCodecType.hevc
+        if photoOutput.availablePhotoCodecTypes.contains(hevcFormat) {
+          photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: hevcFormat])
+          photoSettings.isHighResolutionPhotoEnabled = true
+          if #available(iOS 13.0, *) {
+            photoSettings.photoQualityPrioritization = .quality
+            photoOutput.maxPhotoQualityPrioritization = .quality
+          }
+        } else {
+          print("🔴 \((#file as NSString).lastPathComponent):\(#line) " +
+                "hevc format not available")
+          photoSettings = defaultPhotoSettings()
         }
         
       case .uncompressedTIFF:
