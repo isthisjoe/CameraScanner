@@ -183,6 +183,17 @@ public final class CameraScannerViewController: UIViewController {
     public func toggleAutoScan() {
         isAutoScanEnabled.toggle()
     }
+  
+    public func focusOn(touchPoint: CGPoint) {
+      do {
+          try CaptureSession.current.setFocusPointToTapPoint(touchPoint)
+      } catch {
+          let error = ImageScannerControllerError.inputDevice
+          guard let captureSessionManager = captureSessionManager else { return }
+          captureSessionManager.delegate?.captureSessionManager(captureSessionManager, didFailWithError: error)
+          return
+      }
+    }
 }
 
 extension CameraScannerViewController: RectangleDetectionDelegateProtocol {
