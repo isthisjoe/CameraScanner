@@ -13,6 +13,7 @@ import AVFoundation
 public protocol EditImageViewDelegate: AnyObject {
     /// A method that your delegate object must implement to get cropped image.
     func cropped(image: UIImage, quad: Quadrilateral)
+    func cropFailure(message: String)
 }
 
 /// A view controller that manages edit image for scanning documents or pick image from photo library
@@ -117,6 +118,7 @@ public final class EditImageViewController: UIViewController {
     /// This function allow user can crop image follow quad. the image will send back by delegate function
     public func cropImage() {
         guard let quad = quadView.quad, let ciImage = CIImage(image: image) else {
+          delegate?.cropFailure(message: "Could not crop image.\nPlease try again")
             return
         }
         
